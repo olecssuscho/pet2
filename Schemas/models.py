@@ -6,8 +6,6 @@ class User(BaseModel):
     password:str
     full_name:str
     balance:float
-    is_blocked:bool
-    created_at:str
 
 class Transaction(BaseModel):
     sender_id:int

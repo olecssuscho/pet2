@@ -12,7 +12,7 @@ class User(Base):
     password = Column(String)
     full_name  = Column(String)
     balance  = Column(Float)
-    is_blocked  = Column(Boolean)
+    is_blocked  = Column(Boolean,default="False")
     created_at = Column(String)
 
 class Transaction(Base):
