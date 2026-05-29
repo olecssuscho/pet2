@@ -5,3 +5,9 @@ class UserResponce(BaseModel):
 
     email:str
     full_name:str
+
+class TransactionResponceGood(BaseModel):
+    model_config=ConfigDict(from_attributes=True)
+
+    amount:float
+    status:str = "Success"

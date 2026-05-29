@@ -1,5 +1,5 @@
-from fastapi import FastAPI,APIRouter
-from routers import Users
+from fastapi import FastAPI
+from routers import Users,Transactions
 
 app = FastAPI()
 
@@ -8,3 +8,4 @@ def root():
     return {"message": "Hello World"}
 
 app.include_router(Users.router)
+app.include_router(Transactions.router)

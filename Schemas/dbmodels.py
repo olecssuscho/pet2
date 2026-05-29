@@ -1,5 +1,6 @@
-from sqlalchemy import Column,String,Boolean,Float,Integer,Enum,ForeignKey
+from sqlalchemy import Column,String,Boolean,Float,Integer,Enum,ForeignKey,DateTime
 from sqlalchemy.orm import declarative_base
+from datetime import timezone,datetime
 
 Base = declarative_base()
 
@@ -12,8 +13,8 @@ class User(Base):
     password = Column(String)
     full_name  = Column(String)
     balance  = Column(Float)
-    is_blocked  = Column(Boolean,default="False")
-    created_at = Column(String)
+    is_blocked  = Column(Boolean,default=False)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 class Transaction(Base):
 
