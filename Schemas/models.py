@@ -1,27 +1,27 @@
 from pydantic import BaseModel
 from typing import Literal
 
-class User(BaseModel):
+class UserMODEL(BaseModel):
     email:str
     password:str
     full_name:str
     balance:float
 
-class Transaction(BaseModel):
-    sender_id:int
-    reciever_id:int
+class TransactionMODEL(BaseModel):
+    sender_email:str
+    reciever_email:str
     amount:float
-    status:Literal["pending","success","failed","frozen"]="pending"
+    status:str = "pending"
     type:Literal["transfer","deposit","refund"]
 
-class PaymentRequest(BaseModel):
+class PaymentRequestMODEL(BaseModel):
     from_user_id:int
     to_user_id:int
     amount:float
     message:str
-    status:Literal["pending","success","failed","frozen"]="pending"
+    status:str = "pending"
 
-class Refund(BaseModel):
+class RefundMODEL(BaseModel):
     transaction_id:int
     reason:str
-    status:Literal["pending","success","failed","frozen"]="pending"
+    status:str = "pending"

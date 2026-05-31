@@ -1,9 +1,9 @@
-from schemas.dbmodels import User
+from schemas.dbmodels import UserDB
 from sqlalchemy.orm import Session
 from schemas.responces import UserResponce
 
-def register_service(user:User,db:Session) -> UserResponce:
-    user_db=User(**user.model_dump())
+def register_service(user:UserDB,db:Session) -> UserResponce:
+    user_db=UserDB(**user.model_dump())
     db.add(user_db)
     db.commit()
     db.refresh(user_db)

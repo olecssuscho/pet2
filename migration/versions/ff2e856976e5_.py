@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 4ae78a5c7404
+Revision ID: ff2e856976e5
 Revises: 
-Create Date: 2026-05-29 11:48:32.416929
+Create Date: 2026-05-31 16:10:40.818549
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '4ae78a5c7404'
+revision: str = 'ff2e856976e5'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -45,7 +45,11 @@ def upgrade() -> None:
     op.create_table('Transaction',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('sender_id', sa.Integer(), nullable=True),
+    sa.Column('attempted_sender_id', sa.Integer(), nullable=True),
+    sa.Column('sender_full_name', sa.String(), nullable=True),
     sa.Column('reciever_id', sa.Integer(), nullable=True),
+    sa.Column('attempted_reciever_id', sa.Integer(), nullable=True),
+    sa.Column('reciever_full_name', sa.String(), nullable=True),
     sa.Column('amount', sa.Float(), nullable=True),
     sa.Column('status', sa.String(), nullable=True),
     sa.Column('type', sa.String(), nullable=True),
