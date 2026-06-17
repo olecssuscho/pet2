@@ -1,5 +1,5 @@
-from sqlalchemy import Column,String,Boolean,Float,Integer,Enum,ForeignKey,DateTime
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import Enum,ForeignKey
+from sqlalchemy.orm import declarative_base,DeclarativeBase,Mapped,mapped_column
 from datetime import timezone,datetime
 
 Base = declarative_base()
@@ -8,46 +8,47 @@ class UserDB(Base):
 
     __tablename__ = "Users"
 
-    id = Column(Integer,primary_key=True,autoincrement=True)
-    email = Column(String)
-    password = Column(String)
-    full_name  = Column(String)
-    balance  = Column(Float)
-    is_blocked  = Column(Boolean,default=False)
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
+    email : Mapped[str] 
+    password : Mapped[str] 
+    full_name  : Mapped[str] 
+    balance  : Mapped[float] 
+    is_blocked  : Mapped[bool] = mapped_column(default=False) 
+    created_at : Mapped[datetime] = mapped_column(time_zone=True, default= lambda: datetime.now(timezone.utc)) 
 
 class TransactionDB(Base):
 
     __tablename__ = "Transaction"
 
-    id = Column(Integer,primary_key=True,autoincrement=True)
-    sender_id = Column(Integer,ForeignKey(UserDB.id),nullable=True)
-    attempted_sender_id = Column(Integer, nullable=True)
-    reciever_id = Column(Integer,ForeignKey(UserDB.id),nullable=True)
-    attempted_reciever_id = Column(Integer, nullable=True)
-    amount = Column(Float)
-    attempted_sender_email = Column(String, nullable=True)
-    attempted_reciever_email = Column(String, nullable=True)
-    status = Column(String,Enum("pending","success","failed","frozen",name = "status"),default="pending")
-    type = Column(String,Enum("transfer","deposit","refund",name = "type"))
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
+    sender_id : Mapped[int] = mapped_column(ForeignKey(UserDB.id),nullable=True)
+    attempted_sender_id : Mapped[int] = mapped_column(nullable=True)
+    reciever_id : Mapped[int] = mapped_column(nullable=True)
+    attempted_reciever_id : Mapped[int] = mapped_column(nullable=True)
+    amount : Mapped[float] 
+    attempted_sender_email : Mapped[str] = mapped_column(nullable=True)
+    attempted_reciever_email : Mapped[str] = mapped_column(nullable=True)
+    status : Mapped[str] = mapped_column(Enum("pending","success","failed","frozen",name = "status"), default="pending") 
+    type : Mapped[str] = mapped_column(Enum("transfer","deposit","refund",name = "type"), default="pending")  
+    created_at : Mapped[datetime] = mapped_column(time_zone=True, default= lambda: datetime.now(timezone.utc)) 
+
 
 class PaymentRequestDB(Base):
 
     __tablename__ = "PaymentRequest"
 
-    id = Column(Integer, primary_key=True,autoincrement=True)
-    from_user_id = Column(Integer,ForeignKey(UserDB.id))
-    to_user_id = Column(Integer,ForeignKey(UserDB.id))
-    amount = Column(Float)
-    message = Column(String)
-    status = Column(String,Enum("pending","success","failed","frozen",name = "status"),default="pending")
+    id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
+    from_user_id : Mapped[int] = mapped_column(ForeignKey(UserDB.id))
+    to_user_id : Mapped[int] = mapped_column(ForeignKey(UserDB.id))
+    amount : Mapped[float] 
+    message : Mapped[str] 
+    status : Mapped[str] = mapped_column(Enum("pending","success","failed","frozen",name = "status"), default="pending") 
 
 class RefundDB(Base):
 
     __tablename__ = "Refund"
 
-    id = Column(Integer, primary_key=True,autoincrement=True)    
-    transaction_id = Column(Integer,ForeignKey(TransactionDB.id))
-    reason = Column(String)
-    status = Column(String,Enum("pending","success","failed","frozen",name = "status"),default="pending")
+    id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)  
+    transaction_id : Mapped[int] = mapped_column(ForeignKey(TransactionDB.id))
+    reason : Mapped[str] 
+    status : Mapped[str] = mapped_column(Enum("pending","success","failed","frozen",name = "status"), default="pending") 

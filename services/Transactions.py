@@ -1,5 +1,4 @@
 from schemas.dbmodels import UserDB,TransactionDB
-from schemas.models import TransactionMODEL
 from schemas.responces import TransactionResponceGood
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
