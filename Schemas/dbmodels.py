@@ -1,8 +1,9 @@
 from sqlalchemy import Enum,ForeignKey
-from sqlalchemy.orm import declarative_base,DeclarativeBase,Mapped,mapped_column
+from sqlalchemy.orm import DeclarativeBase,Mapped,mapped_column
 from datetime import timezone,datetime
 
-Base = declarative_base()
+class Base(DeclarativeBase):
+    pass
 
 class UserDB(Base):
 
@@ -21,7 +22,7 @@ class TransactionDB(Base):
     __tablename__ = "Transaction"
 
     id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
-    sender_id : Mapped[int] = mapped_column(ForeignKey(UserDB.id),nullable=True)
+    sender_id : Mapped[int] = mapped_column(ForeignKey("Users.id"),nullable=True)
     attempted_sender_id : Mapped[int] = mapped_column(nullable=True)
     reciever_id : Mapped[int] = mapped_column(nullable=True)
     attempted_reciever_id : Mapped[int] = mapped_column(nullable=True)
@@ -38,8 +39,8 @@ class PaymentRequestDB(Base):
     __tablename__ = "PaymentRequest"
 
     id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
-    from_user_id : Mapped[int] = mapped_column(ForeignKey(UserDB.id))
-    to_user_id : Mapped[int] = mapped_column(ForeignKey(UserDB.id))
+    from_user_id : Mapped[int] = mapped_column(ForeignKey("Users.id"))
+    to_user_id : Mapped[int] = mapped_column(ForeignKey("Users.id"))
     amount : Mapped[float] 
     message : Mapped[str] 
     status : Mapped[str] = mapped_column(Enum("pending","success","failed","frozen",name = "status"), default="pending") 
@@ -49,6 +50,6 @@ class RefundDB(Base):
     __tablename__ = "Refund"
 
     id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)  
-    transaction_id : Mapped[int] = mapped_column(ForeignKey(TransactionDB.id))
+    transaction_id : Mapped[int] = mapped_column(ForeignKey("Transaction.id"))
     reason : Mapped[str] 
     status : Mapped[str] = mapped_column(Enum("pending","success","failed","frozen",name = "status"), default="pending") 
