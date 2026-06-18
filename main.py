@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import Users,Transactions,Refund
+from routers import Users,Transactions,Refund,PaymentRequest
 
 app = FastAPI()
 
@@ -10,3 +10,4 @@ def root():
 app.include_router(Users.router)
 app.include_router(Transactions.router)
 app.include_router(Refund.router)
+app.include_router(PaymentRequest.router)

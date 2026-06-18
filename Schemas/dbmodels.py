@@ -40,7 +40,9 @@ class PaymentRequestDB(Base):
 
     id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
     from_user_id : Mapped[int] = mapped_column(ForeignKey("Users.id"))
+    from_user_email : Mapped[str] 
     to_user_id : Mapped[int] = mapped_column(ForeignKey("Users.id"))
+    to_user_email : Mapped[str]
     amount : Mapped[float] 
     message : Mapped[str] 
     status : Mapped[str] = mapped_column(Enum("pending","success","failed","frozen",name = "status"), default="pending") 

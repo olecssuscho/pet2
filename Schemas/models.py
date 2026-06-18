@@ -15,8 +15,8 @@ class TransactionMODEL(BaseModel):
     type:Literal["transfer","deposit","refund"]
 
 class PaymentRequestMODEL(BaseModel):
-    from_user_id:int
-    to_user_id:int
+    from_user_email:str
+    to_user_email:str
     amount:float
     message:str
     status:str = "pending"
