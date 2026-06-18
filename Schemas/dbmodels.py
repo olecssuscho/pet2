@@ -1,4 +1,4 @@
-from sqlalchemy import Enum,ForeignKey
+from sqlalchemy import Enum,ForeignKey,DateTime
 from sqlalchemy.orm import DeclarativeBase,Mapped,mapped_column
 from datetime import timezone,datetime
 
@@ -15,7 +15,7 @@ class UserDB(Base):
     full_name  : Mapped[str] 
     balance  : Mapped[float] 
     is_blocked  : Mapped[bool] = mapped_column(default=False) 
-    created_at : Mapped[datetime] = mapped_column(time_zone=True, default= lambda: datetime.now(timezone.utc)) 
+    created_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default= lambda: datetime.now(timezone.utc)) 
 
 class TransactionDB(Base):
 
@@ -31,7 +31,7 @@ class TransactionDB(Base):
     attempted_reciever_email : Mapped[str] = mapped_column(nullable=True)
     status : Mapped[str] = mapped_column(Enum("pending","success","failed","frozen",name = "status"), default="pending") 
     type : Mapped[str] = mapped_column(Enum("transfer","deposit","refund",name = "type"), default="pending")  
-    created_at : Mapped[datetime] = mapped_column(time_zone=True, default= lambda: datetime.now(timezone.utc)) 
+    created_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default= lambda: datetime.now(timezone.utc)) 
 
 
 class PaymentRequestDB(Base):
