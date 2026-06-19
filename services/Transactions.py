@@ -8,9 +8,6 @@ from fastapi import status,HTTPException
 def transaction_service(email:str,transaction:TransactionDB,reciever_email,db:Session) -> TransactionResponceGood:
 
     try:
-        user_email = db.query(UserDB).filter(UserDB.email == email).first()
-        if not user_email:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
         sender_db = db.query(UserDB).filter(UserDB.email==email).with_for_update().first()
         if not sender_db:
             bad_transaction_db = TransactionDB(
@@ -111,4 +108,15 @@ def transaction_service(email:str,transaction:TransactionDB,reciever_email,db:Se
         raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail=f"Content: {e}")
 
     return transaction_db
+
+def get_transactions_services(user:UserDB,db:Session):
+    return db.query(TransactionDB).filter((TransactionDB.sender_id == user.id) | ((TransactionDB.reciever_id == user.id))).all()
+
+
+def get_particular_transaction_services(id:int,user:UserDB,db:Session):
+    transaction = db.query(TransactionDB).filter(TransactionDB.id == id,(TransactionDB.sender_id == user.id) | (TransactionDB.reciever_id == user.id)).first()
     
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    return transaction

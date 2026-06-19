@@ -4,9 +4,6 @@ from fastapi import status,HTTPException
 
 def payment_request_services(user:UserDB,payment_request:PaymentRequestDB,db:Session):
     
-    if db.query(UserDB).filter(UserDB.email == user.email).first() is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=" Sender not found")
-    
     if db.query(UserDB).filter(UserDB.email == payment_request.to_user_email).first() is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=" Receiver not found")
     
@@ -29,3 +26,5 @@ def payment_request_services(user:UserDB,payment_request:PaymentRequestDB,db:Ses
 
     return payment_request_db.status
     
+def get_payment_requests_services(user:UserDB,db:Session):
+    return db.query(PaymentRequestDB).filter((PaymentRequestDB.from_user_id == user.id) | (PaymentRequestDB.to_user_id == user.id)).all()

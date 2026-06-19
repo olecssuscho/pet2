@@ -4,6 +4,7 @@ from schemas.responces import UserResponce
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import HTTPException,status
 from auth import verify_password,create_access_token,create_refresh_token,hash_password
+from auth import decode_token,create_access_token
 
 def register_service(user:UserDB,db:Session) -> UserResponce:
     refresh_token=create_refresh_token({"email":user.email})
@@ -21,4 +22,18 @@ def login_services(form_data:OAuth2PasswordRequestForm,db:Session):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Password is not correct")
     access_token = create_access_token({"email": user.email})
     return {"access_token": access_token, "refresh_token": user.refresh_token,"token_type": "bearer"}
-    
+
+def get_user_services(user:UserDB,db:Session):
+    return db.query(UserDB).filter(UserDB.id==user.id).first()
+
+def refresh_services(token:str,db:Session):
+    refresh = decode_token(token)
+    if not refresh:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid token")
+    if not "email" in refresh:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid token")
+    if db.query(UserDB).filter(UserDB.email == refresh["email"]).first():
+        access = create_access_token({"email": refresh["email"]})
+        return {"access_token": access, "token_type": "bearer"}
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="User not found")
