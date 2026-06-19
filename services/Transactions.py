@@ -5,9 +5,12 @@ from sqlalchemy.exc import SQLAlchemyError
 from fastapi import status,HTTPException
 
 
-def transaction_service(transaction:TransactionDB,sender_email,reciever_email,db:Session) -> TransactionResponceGood:
+def transaction_service(email:str,transaction:TransactionDB,sender_email,reciever_email,db:Session) -> TransactionResponceGood:
 
     try:
+        user_email = db.query(UserDB).filter(UserDB.email == email).first()
+        if not user_email:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
         sender_db = db.query(UserDB).filter(UserDB.email==sender_email).with_for_update().first()
         if not sender_db:
             bad_transaction_db = TransactionDB(
@@ -16,7 +19,9 @@ def transaction_service(transaction:TransactionDB,sender_email,reciever_email,db
             status = "failed",
             type = transaction.type,
             attempted_sender_email = sender_email,
-            attempted_reciever_email = reciever_email)
+            attempted_reciever_email = reciever_email,
+            asker = email
+            )
             db.add(bad_transaction_db)
             db.commit()
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Sender not found")
@@ -27,11 +32,25 @@ def transaction_service(transaction:TransactionDB,sender_email,reciever_email,db
             status = "frozen",
             type = transaction.type,
             attempted_sender_email = sender_email,
-            attempted_reciever_email = reciever_email)
+            attempted_reciever_email = reciever_email,
+            asker = email
+            )
             db.add(bad_transaction_db)
             db.commit()
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="Sender blocked")
-        
+        if email != sender_email:
+            bad_transaction_db = TransactionDB(
+            sender_id = sender_db.id,
+            amount = transaction.amount,
+            status = "frozen",
+            type = transaction.type,
+            attempted_sender_email = sender_email,
+            attempted_reciever_email = reciever_email,
+            asker = email
+            )
+            db.add(bad_transaction_db)
+            db.commit()
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="Sender email not equals your email")
         reciever_db = db.query(UserDB).filter(UserDB.email==reciever_email).with_for_update().first()
         if not reciever_db:   
             bad_transaction_db = TransactionDB(
@@ -41,7 +60,9 @@ def transaction_service(transaction:TransactionDB,sender_email,reciever_email,db
             status = "failed",
             type = transaction.type,
             attempted_sender_email = sender_email,
-            attempted_reciever_email = reciever_email)
+            attempted_reciever_email = reciever_email,
+            asker = email
+            )
             db.add(bad_transaction_db)
             db.commit()
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Receiver not found")
@@ -53,7 +74,9 @@ def transaction_service(transaction:TransactionDB,sender_email,reciever_email,db
             status = "frozen",
             type = transaction.type,
             attempted_sender_email = sender_email,
-            attempted_reciever_email = reciever_email)
+            attempted_reciever_email = reciever_email,
+            asker = email
+            )
             db.add(bad_transaction_db)
             db.commit()
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="Receiver blocked")
@@ -68,7 +91,9 @@ def transaction_service(transaction:TransactionDB,sender_email,reciever_email,db
             status = "failed",
             type = transaction.type,
             attempted_sender_email = sender_email,
-            attempted_reciever_email = reciever_email)
+            attempted_reciever_email = reciever_email,
+            asker = email
+            )
             db.add(bad_transaction_db)
             db.commit()
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,detail="Sender amount less than 0 or less than balance")
@@ -83,7 +108,9 @@ def transaction_service(transaction:TransactionDB,sender_email,reciever_email,db
             status = "success",
             type = transaction.type,
             attempted_sender_email = sender_email,
-            attempted_reciever_email = reciever_email)
+            attempted_reciever_email = reciever_email,
+            asker = email
+            )
         db.add(transaction_db)
         db.commit()
         db.refresh(transaction_db)

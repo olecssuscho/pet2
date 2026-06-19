@@ -8,4 +8,4 @@ router = APIRouter()
 
 @router.post("/payment_request")
 def payment_request(payment_request: PaymentRequestMODEL,user:UserMODEL = Depends(get_current_user), db:Session = Depends(get_db)):
-    return payment_request_services(payment_request,db)
+    return payment_request_services(user.email,payment_request,db)

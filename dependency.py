@@ -21,7 +21,7 @@ def get_current_user(token:str = Depends(user_schema), db:Session = Depends(get_
     if payload.get("type")!="access":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Invalid token")
     else:
-        user = db.query(UserDB).filter(UserDB.email == token["email"]).first()
+        user = db.query(UserDB).filter(UserDB.email == payload["email"]).first()
         if not user:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User with that credentials no found")
         return user

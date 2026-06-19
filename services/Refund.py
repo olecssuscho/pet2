@@ -3,11 +3,18 @@ from sqlalchemy.orm import Session
 from fastapi import status,HTTPException
 
 
-def refund_services(refund:RefundDB,db:Session):
+def refund_services(email:str,refund:RefundDB,db:Session):
+    user_email = db.query(UserDB).filter(UserDB.email == email).first()
+    if not user_email:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    
     transaction_db = db.query(TransactionDB).filter(TransactionDB.id==refund.transaction_id).first()
     if transaction_db is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND , detail="This Transaction does not exist")
     
+    if email != transaction_db.attempted_sender_email :
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="Sender email not equals your email")
+
     refund_db = db.query(RefundDB).filter(RefundDB.transaction_id==refund.transaction_id).first()
     if refund_db:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT , detail="This Refund exist")
@@ -37,7 +44,8 @@ def refund_services(refund:RefundDB,db:Session):
     refund_db = RefundDB(
         transaction_id = refund.transaction_id,
         reason = refund.reason,
-        status = "success"
+        status = "success",
+        asker = email
     )
     db.add(refund_db)
     db.commit() 

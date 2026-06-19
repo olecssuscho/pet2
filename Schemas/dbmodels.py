@@ -24,6 +24,7 @@ class TransactionDB(Base):
     __tablename__ = "Transaction"
 
     id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
+    asker : Mapped[str] = mapped_column(nullable=True) 
     sender_id : Mapped[int] = mapped_column(ForeignKey("Users.id"),nullable=True)
     attempted_sender_id : Mapped[int] = mapped_column(nullable=True)
     reciever_id : Mapped[int] = mapped_column(nullable=True)
@@ -41,6 +42,7 @@ class PaymentRequestDB(Base):
     __tablename__ = "PaymentRequest"
 
     id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
+    asker : Mapped[str] = mapped_column(nullable=True) 
     from_user_id : Mapped[int] = mapped_column(ForeignKey("Users.id"))
     from_user_email : Mapped[str] 
     to_user_id : Mapped[int] = mapped_column(ForeignKey("Users.id"))
@@ -54,6 +56,7 @@ class RefundDB(Base):
     __tablename__ = "Refund"
 
     id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)  
+    asker : Mapped[str] = mapped_column(nullable=True) 
     transaction_id : Mapped[int] = mapped_column(ForeignKey("Transaction.id"))
     reason : Mapped[str] 
     status : Mapped[str] = mapped_column(Enum("pending","success","failed","frozen",name = "status"), default="pending") 

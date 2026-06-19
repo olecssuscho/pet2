@@ -2,7 +2,11 @@ from schemas.dbmodels import PaymentRequestDB,UserDB
 from sqlalchemy.orm import Session
 from fastapi import status,HTTPException
 
-def payment_request_services(payment_request:PaymentRequestDB,db:Session):
+def payment_request_services(email:str,payment_request:PaymentRequestDB,db:Session):
+    user_email = db.query(UserDB).filter(UserDB.email == email).first()
+    if not user_email:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    
     if db.query(UserDB).filter(UserDB.email == payment_request.from_user_email).first() is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=" Sender not found")
     
@@ -21,7 +25,8 @@ def payment_request_services(payment_request:PaymentRequestDB,db:Session):
         to_user_email = payment_request.to_user_email,
         amount = payment_request.amount,
         message = payment_request.message,
-        status = "success"
+        status = "success",
+        asker = email
     )
     db.add(payment_request_db)
     db.commit()
