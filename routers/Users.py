@@ -1,12 +1,16 @@
 from schemas.models import UserMODEL
 from sqlalchemy.orm import Session
 from fastapi import Depends,APIRouter
-from dependency import get_db
-from services.Users import register_service
-from schemas.responces import UserResponce
+from fastapi.security import OAuth2PasswordRequestForm
+from dependency import get_db,get_current_user
+from services.Users import register_service,login_services
 
 router = APIRouter()
 
 @router.post("/register")
-def register(user:UserMODEL,db:Session = Depends(get_db))-> UserResponce:
+def register(user:UserMODEL,db:Session = Depends(get_db)) -> str:
     return register_service(user,db)
+
+@router.post("/user/login")
+def login(form_data:OAuth2PasswordRequestForm = Depends(),db:Session = Depends(get_db)):
+    return login_services(form_data,db)

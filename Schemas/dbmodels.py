@@ -15,6 +15,8 @@ class UserDB(Base):
     full_name  : Mapped[str] 
     balance  : Mapped[float] 
     is_blocked  : Mapped[bool] = mapped_column(default=False) 
+    access_token : Mapped[str] = mapped_column(nullable=True) 
+    refresh_token : Mapped[str] = mapped_column(nullable=True) 
     created_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default= lambda: datetime.now(timezone.utc)) 
 
 class TransactionDB(Base):
