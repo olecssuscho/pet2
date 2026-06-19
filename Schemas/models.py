@@ -8,14 +8,12 @@ class UserMODEL(BaseModel):
     balance:float
 
 class TransactionMODEL(BaseModel):
-    sender_email:str
     reciever_email:str
     amount:float
     status:str = "pending"
     type:Literal["transfer","deposit","refund"]
 
 class PaymentRequestMODEL(BaseModel):
-    from_user_email:str
     to_user_email:str
     amount:float
     message:str

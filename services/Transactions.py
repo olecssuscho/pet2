@@ -5,20 +5,20 @@ from sqlalchemy.exc import SQLAlchemyError
 from fastapi import status,HTTPException
 
 
-def transaction_service(email:str,transaction:TransactionDB,sender_email,reciever_email,db:Session) -> TransactionResponceGood:
+def transaction_service(email:str,transaction:TransactionDB,reciever_email,db:Session) -> TransactionResponceGood:
 
     try:
         user_email = db.query(UserDB).filter(UserDB.email == email).first()
         if not user_email:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
-        sender_db = db.query(UserDB).filter(UserDB.email==sender_email).with_for_update().first()
+        sender_db = db.query(UserDB).filter(UserDB.email==email).with_for_update().first()
         if not sender_db:
             bad_transaction_db = TransactionDB(
             attempted_sender_id = None, 
             amount = transaction.amount,
             status = "failed",
             type = transaction.type,
-            attempted_sender_email = sender_email,
+            attempted_sender_email = email,
             attempted_reciever_email = reciever_email,
             asker = email
             )
@@ -31,26 +31,14 @@ def transaction_service(email:str,transaction:TransactionDB,sender_email,recieve
             amount = transaction.amount,
             status = "frozen",
             type = transaction.type,
-            attempted_sender_email = sender_email,
+            attempted_sender_email = email,
             attempted_reciever_email = reciever_email,
             asker = email
             )
             db.add(bad_transaction_db)
             db.commit()
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="Sender blocked")
-        if email != sender_email:
-            bad_transaction_db = TransactionDB(
-            sender_id = sender_db.id,
-            amount = transaction.amount,
-            status = "frozen",
-            type = transaction.type,
-            attempted_sender_email = sender_email,
-            attempted_reciever_email = reciever_email,
-            asker = email
-            )
-            db.add(bad_transaction_db)
-            db.commit()
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,detail="Sender email not equals your email")
+        
         reciever_db = db.query(UserDB).filter(UserDB.email==reciever_email).with_for_update().first()
         if not reciever_db:   
             bad_transaction_db = TransactionDB(
@@ -59,7 +47,7 @@ def transaction_service(email:str,transaction:TransactionDB,sender_email,recieve
             amount = transaction.amount,
             status = "failed",
             type = transaction.type,
-            attempted_sender_email = sender_email,
+            attempted_sender_email = email,
             attempted_reciever_email = reciever_email,
             asker = email
             )
@@ -73,7 +61,7 @@ def transaction_service(email:str,transaction:TransactionDB,sender_email,recieve
             amount = transaction.amount,
             status = "frozen",
             type = transaction.type,
-            attempted_sender_email = sender_email,
+            attempted_sender_email = email,
             attempted_reciever_email = reciever_email,
             asker = email
             )
@@ -90,7 +78,7 @@ def transaction_service(email:str,transaction:TransactionDB,sender_email,recieve
             amount = transaction.amount,
             status = "failed",
             type = transaction.type,
-            attempted_sender_email = sender_email,
+            attempted_sender_email = email,
             attempted_reciever_email = reciever_email,
             asker = email
             )
@@ -98,7 +86,7 @@ def transaction_service(email:str,transaction:TransactionDB,sender_email,recieve
             db.commit()
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,detail="Sender amount less than 0 or less than balance")
         
-        db.query(UserDB).filter(UserDB.email==sender_email).update({UserDB.balance: UserDB.balance - sender_amount})
+        db.query(UserDB).filter(UserDB.email==email).update({UserDB.balance: UserDB.balance - sender_amount})
         db.query(UserDB).filter(UserDB.email==reciever_email).update({UserDB.balance: UserDB.balance + sender_amount})
     
         transaction_db = TransactionDB( 
@@ -107,7 +95,7 @@ def transaction_service(email:str,transaction:TransactionDB,sender_email,recieve
             amount = transaction.amount,
             status = "success",
             type = transaction.type,
-            attempted_sender_email = sender_email,
+            attempted_sender_email = email,
             attempted_reciever_email = reciever_email,
             asker = email
             )

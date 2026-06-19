@@ -8,4 +8,4 @@ router = APIRouter()
 
 @router.post("/transaction")
 def transaction(transaction:TransactionMODEL,user:UserMODEL = Depends(get_current_user),db:Session = Depends(get_db)):
-    return transaction_service(user.email,transaction,transaction.sender_email,transaction.reciever_email,db)
+    return transaction_service(user.email,transaction,transaction.reciever_email,db)
