@@ -18,6 +18,7 @@ class PaymentRequestMODEL(BaseModel):
     amount:float
     message:str
     status:str = "pending"
+    type:Literal["transfer","deposit","refund"]
 
 class RefundMODEL(BaseModel):
     transaction_id:int

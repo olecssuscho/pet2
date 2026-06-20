@@ -1,6 +1,8 @@
-from schemas.dbmodels import PaymentRequestDB,UserDB
+from schemas.dbmodels import PaymentRequestDB,UserDB,TransactionDB
+from schemas.models import TransactionMODEL
 from sqlalchemy.orm import Session
 from fastapi import status,HTTPException
+from services.Transactions import transaction_service
 
 def payment_request_services(user:UserDB,payment_request:PaymentRequestDB,db:Session):
     
@@ -19,7 +21,8 @@ def payment_request_services(user:UserDB,payment_request:PaymentRequestDB,db:Ses
         amount = payment_request.amount,
         message = payment_request.message,
         status = "success",
-        asker = user.email
+        asker = user.email,
+        type = payment_request.type
     )
     db.add(payment_request_db)
     db.commit()
@@ -28,3 +31,23 @@ def payment_request_services(user:UserDB,payment_request:PaymentRequestDB,db:Ses
     
 def get_payment_requests_services(user:UserDB,db:Session):
     return db.query(PaymentRequestDB).filter((PaymentRequestDB.from_user_id == user.id) | (PaymentRequestDB.to_user_id == user.id)).all()
+
+def payment_request_approve_services(id:int,user:UserDB,db:Session):
+    PaymentRequest = db.query(PaymentRequestDB).filter(PaymentRequestDB.id == id).first()
+    
+    if not PaymentRequest:
+        raise HTTPException(status_code=404, detail="Payment request not found")
+    
+    transaction = TransactionMODEL(
+        reciever_email = PaymentRequest.to_user_email,
+        amount = PaymentRequest.amount,
+        status = PaymentRequest.status,
+        type = PaymentRequest.type
+    )
+
+    transaction_db = transaction_service(user.email,transaction,PaymentRequest.to_user_email,db)
+
+    PaymentRequest.transaction_id = transaction_db.id
+    PaymentRequest.status = "success"
+    db.commit()
+    return PaymentRequest.status

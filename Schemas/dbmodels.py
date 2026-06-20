@@ -32,7 +32,7 @@ class TransactionDB(Base):
     attempted_sender_email : Mapped[str] = mapped_column(nullable=True)
     attempted_reciever_email : Mapped[str] = mapped_column(nullable=True)
     status : Mapped[str] = mapped_column(Enum("pending","success","failed","frozen",name = "status"), default="pending") 
-    type : Mapped[str] = mapped_column(Enum("transfer","deposit","refund",name = "type"), default="pending")  
+    type : Mapped[str] = mapped_column(Enum("transfer","deposit","refund",name = "type"), default="transfer")  
     created_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default= lambda: datetime.now(timezone.utc)) 
 
 
@@ -49,6 +49,8 @@ class PaymentRequestDB(Base):
     amount : Mapped[float] 
     message : Mapped[str] 
     status : Mapped[str] = mapped_column(Enum("pending","success","failed","frozen",name = "status"), default="pending") 
+    type : Mapped[str] = mapped_column(Enum("transfer","deposit","refund",name = "type"), default="transfer", nullable=True)
+    transaction_id: Mapped[int] = mapped_column(ForeignKey("Transaction.id"), nullable=True)
 
 class RefundDB(Base):
 
