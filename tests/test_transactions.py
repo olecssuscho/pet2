@@ -32,7 +32,7 @@ def test_transactions():
 
         results.append(transaction.status_code)
     
-    transactions_10 = [threading.Thread(target=make_tr()) for _ in range(10)]
+    transactions_10 = [threading.Thread(target=make_tr) for _ in range(10)]
 
     for t in transactions_10:
         t.start()

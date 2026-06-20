@@ -20,7 +20,7 @@ def payment_request_services(user:UserDB,payment_request:PaymentRequestDB,db:Ses
         to_user_email = payment_request.to_user_email,
         amount = payment_request.amount,
         message = payment_request.message,
-        status = "success",
+        status = "pending",
         asker = user.email,
         type = payment_request.type
     )
@@ -36,7 +36,10 @@ def payment_request_approve_services(id:int,user:UserDB,db:Session):
     PaymentRequest = db.query(PaymentRequestDB).filter(PaymentRequestDB.id == id).first()
     
     if not PaymentRequest:
-        raise HTTPException(status_code=404, detail="Payment request not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payment request not found")
+    
+    if PaymentRequest.to_user_id != user.id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not your payment request")
     
     transaction = TransactionMODEL(
         reciever_email = PaymentRequest.to_user_email,
