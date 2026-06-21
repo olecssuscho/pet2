@@ -2,38 +2,28 @@ import pytest
 from fastapi.testclient import TestClient
 import threading
 from main import app
-from services.Transactions import transaction_service
+from conftest import client
 
-
-user = TestClient(app)
 
 def test_transactions():
+    user1 = client.post("/user/login", data={"username": "user1000", "password": "user10"})
     
+    if user1.status_code == 404:
+        client.post("/register", json={"email": "user1000", "password": "user10", "full_name": "user1", "balance": 100})
+        client.post("/register", json={"email": "user2000", "password": "user20", "full_name": "user2", "balance": 0})
+
     results = []
-    
-    user1 = user.post("/register", json={"email":"user1000",
-                                         "password":"user10",
-                                         "full_name":"user1",
-                                         "balance":100})
-    user1_email = user1.json()["email"]
-    
-    user2 = user.post("/register", json={"email":"user2000",
-                                         "password":"user20",
-                                         "full_name":"user2",
-                                         "balance":0})
-    user2_email = user2.json()["email"]
 
     def make_tr():
-        transaction = user.post("/transaction", json={"sender_email":user1_email,
-                                                      "reciever_email":user2_email,
-                                                      "amount":20,
-                                                      "status":"pending",
-                                                      "type":"transfer"})
+        with TestClient(app) as client:
+            token = client.post("/user/login", data={"username": "user1000", "password": "user10"}).json()["access_token"]
+            transaction = client.post("/transaction",
+                json={"reciever_email": "user2000", "amount": 20, "type": "transfer"},
+                headers={"Authorization": f"Bearer {token}"}
+            )
+            results.append(transaction.status_code)
 
-        results.append(transaction.status_code)
-    
     transactions_10 = [threading.Thread(target=make_tr) for _ in range(10)]
-
     for t in transactions_10:
         t.start()
     for t in transactions_10:

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from schemas.responces import UserResponce
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi import HTTPException,status
-from sqlalchemy import func,select
+from sqlalchemy import func
 from auth import verify_password,create_access_token,create_refresh_token,hash_password
 from auth import decode_token,create_access_token
 
@@ -50,3 +50,19 @@ def get_stats_services(user:UserDB, db:Session):
             "total_refunds": total_refunds , 
             "total_sent": total_sent, 
             "total_recieve":total_recieve}
+
+def get_transactions_services(from_date,to_date,status,type,user:UserDB,db:Session):
+    query = db.query(TransactionDB).filter(
+        (TransactionDB.attempted_sender_email == user.email) | 
+        (TransactionDB.attempted_reciever_email == user.email))
+    
+    if status:
+        query = query.filter(TransactionDB.status == status)
+    if type:
+        query = query.filter(TransactionDB.type == type)
+    if from_date:
+        query = query.filter(TransactionDB.created_at > from_date)
+    if to_date:
+        query = query.filter(TransactionDB.created_at < to_date)
+
+    return query.all()
