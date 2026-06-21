@@ -20,7 +20,7 @@ class UserDB(Base):
 
 class TransactionDB(Base):
 
-    __tablename__ = "Transaction"
+    __tablename__ = "Transactions"
 
     id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
     asker : Mapped[str] = mapped_column(nullable=True) 
@@ -38,7 +38,7 @@ class TransactionDB(Base):
 
 class PaymentRequestDB(Base):
 
-    __tablename__ = "PaymentRequest"
+    __tablename__ = "PaymentRequests"
 
     id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
     asker : Mapped[str] = mapped_column(nullable=True) 
@@ -50,14 +50,31 @@ class PaymentRequestDB(Base):
     message : Mapped[str] 
     status : Mapped[str] = mapped_column(Enum("pending","success","failed","frozen",name = "status"), default="pending") 
     type : Mapped[str] = mapped_column(Enum("transfer","deposit","refund",name = "type"), default="transfer", nullable=True)
-    transaction_id: Mapped[int] = mapped_column(ForeignKey("Transaction.id"), nullable=True)
+    transaction_id: Mapped[int] = mapped_column(ForeignKey("Transactions.id"), nullable=True)
 
 class RefundDB(Base):
 
-    __tablename__ = "Refund"
+    __tablename__ = "Refunds"
 
     id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)  
     asker : Mapped[str] = mapped_column(nullable=True) 
-    transaction_id : Mapped[int] = mapped_column(ForeignKey("Transaction.id"))
+    transaction_id : Mapped[int] = mapped_column(ForeignKey("Transactions.id"))
     reason : Mapped[str] 
     status : Mapped[str] = mapped_column(Enum("pending","success","failed","frozen",name = "status"), default="pending") 
+
+class WebhookDB(Base):
+
+    __tablename__ = "Webhooks"
+
+    id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
+    url : Mapped[str]
+    user_id : Mapped[int] = mapped_column(ForeignKey("Users.id"))
+
+class WebhookLogDB(Base):
+
+    __tablename__ = "WebhooksLog"
+
+    id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
+    webhook_id : Mapped[int] = mapped_column(ForeignKey("Webhooks.id"))
+    attempted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    responce_status : Mapped[str]
