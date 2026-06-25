@@ -24,3 +24,6 @@ class RefundMODEL(BaseModel):
     transaction_id:int
     reason:str
     status:str = "pending"
+
+class WebhookMODEL(BaseModel):
+    url:str
