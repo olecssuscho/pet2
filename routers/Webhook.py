@@ -1,8 +1,8 @@
-from fastapi import APIRouter,Depends
-from schemas.models import WebhookMODEL,UserMODEL
+from fastapi import APIRouter,Depends,Body
+from schemas.models import UserMODEL
 from sqlalchemy.orm import Session
 from dependency import get_current_user,get_db
-from services.Webhook import webhook_post_service,webhook_get_service,webhook_delete_service
+from services.Webhook import webhook_post_service,webhook_get_service,webhook_delete_service,post_webhook_on_url
 
 router = APIRouter()
 
@@ -16,4 +16,8 @@ def webhook_get(user:UserMODEL = Depends(get_current_user),db:Session = Depends(
 
 @router.delete("/webhook/{id}")
 def webhook_delete(id:int,user:UserMODEL = Depends(get_current_user),db:Session = Depends(get_db)):
-    return webhook_delete_service(id,user,db)
+    return webhook_delete_service(id,db)
+
+@router.post("/webhook/url/post")
+def webhook_post(url:str = None,result = str,user:UserMODEL = Depends(get_current_user),db:Session = Depends(get_db)):
+    return post_webhook_on_url(url,result,user.id,db)

@@ -1,11 +1,12 @@
-from schemas.dbmodels import UserDB,TransactionDB
+from schemas.dbmodels import UserDB,TransactionDB,WebhookDB
 from schemas.responces import TransactionResponceGood
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from fastapi import status,HTTPException
+from fastapi import status,HTTPException,BackgroundTasks
+from services.Webhook import post_webhook_on_url
+import validators
 
-
-def transaction_service(email:str,transaction:TransactionDB,reciever_email,db:Session) -> TransactionResponceGood:
+def transaction_service(backgroundtask:BackgroundTasks,email:str,transaction:TransactionDB,reciever_email,db:Session) -> TransactionResponceGood:
 
     try:
         sender_db = db.query(UserDB).filter(UserDB.email==email).with_for_update().first()
@@ -99,7 +100,16 @@ def transaction_service(email:str,transaction:TransactionDB,reciever_email,db:Se
         db.add(transaction_db)
         db.commit()
         db.refresh(transaction_db)
-    
+
+        webhook = db.query(WebhookDB).filter(WebhookDB.user_id == sender_db.id).first()
+        
+        if validators.url(webhook.url) is False:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail = " Your URL is not worked")
+        else:
+            backgroundtask.add_task(post_webhook_on_url,webhook.url,transaction_db.status,sender_db.id,db)
+            backgroundtask.add_task(post_webhook_on_url,webhook.url,transaction_db.status,reciever_db.id,db)
+
+
     except HTTPException:
         raise
 
@@ -108,6 +118,7 @@ def transaction_service(email:str,transaction:TransactionDB,reciever_email,db:Se
         raise HTTPException(status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, detail=f"Content: {e}")
 
     return transaction_db
+
 
 def get_transactions_services(user:UserDB,db:Session):
     return db.query(TransactionDB).filter((TransactionDB.sender_id == user.id) | ((TransactionDB.reciever_id == user.id))).all()
