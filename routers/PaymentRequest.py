@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from dependency import get_db,get_current_user
 from services.PaymentRequest import payment_request_services,get_payment_requests_services,payment_request_approve_services
 
-router = APIRouter()
+router = APIRouter(prefix="/payment_request", tags=["Payment_requests"])
 
 @router.post("/payment_request")
 def payment_request(payment_request: PaymentRequestMODEL,user:UserMODEL = Depends(get_current_user), db:Session = Depends(get_db)):

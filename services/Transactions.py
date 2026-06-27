@@ -5,6 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from fastapi import status,HTTPException,BackgroundTasks
 from services.Webhook import post_webhook_on_url
 import validators
+from datetime import timezone,datetime
 
 def transaction_service(backgroundtask:BackgroundTasks,email:str,transaction:TransactionDB,reciever_email,db:Session) -> TransactionResponceGood:
 
@@ -133,3 +134,9 @@ def get_particular_transaction_services(id:int,user:UserDB,db:Session):
         raise HTTPException(status_code=404, detail="Transaction not found")
     
     return transaction
+
+def delete_transaction_services(id:int,user:UserDB,db:Session):
+    to_delete = db.query(TransactionDB).filter(TransactionDB.id == id).first()
+    to_delete.deleted_at = datetime.now(timezone.utc)
+    db.commit()
+    return "Success"

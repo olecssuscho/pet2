@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from dependency import get_db,get_current_user
 from services.Users import register_service,login_services,get_user_services,refresh_services,get_stats_services,get_transactions_services
 
-router = APIRouter()
+router = APIRouter(prefix="/user", tags=["Users"])
 
 @router.post("/register")
 def register(user:UserMODEL,db:Session = Depends(get_db)) -> str:

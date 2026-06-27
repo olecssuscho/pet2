@@ -1,7 +1,7 @@
 from schemas.dbmodels import WebhookDB,UserDB,WebhookLogDB
 from sqlalchemy.orm import Session
 import httpx
-from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type, RetryCallState
+from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
 from fastapi import HTTPException,status
 
 def webhook_post_service(url:str,user:UserDB,db:Session):

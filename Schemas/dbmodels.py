@@ -10,6 +10,7 @@ class UserDB(Base):
     __tablename__ = "Users"
 
     id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
+    role : Mapped[str] = mapped_column(default="user", nullable= True)
     email : Mapped[str] 
     password : Mapped[str] 
     full_name  : Mapped[str] 

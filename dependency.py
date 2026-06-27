@@ -5,7 +5,7 @@ from fastapi import HTTPException,status,Depends
 from sqlalchemy.orm import Session
 from schemas.dbmodels import UserDB
 
-user_schema = OAuth2PasswordBearer(tokenUrl="/user/login")
+user_schema = OAuth2PasswordBearer(tokenUrl="/user/user/login")
 
 def get_db():
     db=SessionLocal()
@@ -25,3 +25,8 @@ def get_current_user(token:str = Depends(user_schema), db:Session = Depends(get_
         if not user:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User with that credentials no found")
         return user
+    
+def get_current_admin(user:UserDB = Depends(get_current_user)):
+    if user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    return user
