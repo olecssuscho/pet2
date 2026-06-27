@@ -51,13 +51,13 @@ def get_stats_services(user:UserDB, db:Session):
             "total_sent": total_sent, 
             "total_recieve":total_recieve}
 
-def get_transactions_services(from_date,to_date,status,type,user:UserDB,db:Session):
+def get_transactions_services(from_date,to_date,status_transaction,type,user:UserDB,db:Session):
     query = db.query(TransactionDB).filter(
         (TransactionDB.attempted_sender_email == user.email) | 
         (TransactionDB.attempted_reciever_email == user.email))
     
-    if status:
-        query = query.filter(TransactionDB.status == status)
+    if status_transaction:
+        query = query.filter(TransactionDB.status == status_transaction)
     if type:
         query = query.filter(TransactionDB.type == type)
     if from_date:

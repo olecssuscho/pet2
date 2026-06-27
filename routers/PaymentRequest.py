@@ -1,4 +1,4 @@
-from fastapi import Depends,APIRouter
+from fastapi import Depends,APIRouter,BackgroundTasks
 from schemas.models import PaymentRequestMODEL,UserMODEL
 from sqlalchemy.orm import Session
 from dependency import get_db,get_current_user
@@ -15,5 +15,5 @@ def get_payment_requests(user:UserMODEL = Depends(get_current_user),db:Session =
     return get_payment_requests_services(user,db)
 
 @router.post("/payment_request/{id}/approve")
-def payment_request_approve(id:int,user:UserMODEL = Depends(get_current_user),db:Session = Depends(get_db)):
-    return payment_request_approve_services(id,user,db)
+def payment_request_approve(backgroundtask:BackgroundTasks,id:int,user:UserMODEL = Depends(get_current_user),db:Session = Depends(get_db)):
+    return payment_request_approve_services(backgroundtask,id,user,db)

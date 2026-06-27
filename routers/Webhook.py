@@ -19,5 +19,5 @@ def webhook_delete(id:int,user:UserMODEL = Depends(get_current_user),db:Session 
     return webhook_delete_service(id,db)
 
 @router.post("/webhook/url/post")
-def webhook_post(url:str = None,result = str,user:UserMODEL = Depends(get_current_user),db:Session = Depends(get_db)):
+def webhook_post(url:str = None,result:str = None,user:UserMODEL = Depends(get_current_user),db:Session = Depends(get_db)):
     return post_webhook_on_url(url,result,user.id,db)

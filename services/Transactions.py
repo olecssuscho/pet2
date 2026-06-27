@@ -102,7 +102,9 @@ def transaction_service(backgroundtask:BackgroundTasks,email:str,transaction:Tra
         db.refresh(transaction_db)
 
         webhook = db.query(WebhookDB).filter(WebhookDB.user_id == sender_db.id).first()
-        
+        if webhook is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail = " Your Webhook is not found") 
+
         if validators.url(webhook.url) is False:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail = " Your URL is not worked")
         else:

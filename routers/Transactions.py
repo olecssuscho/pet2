@@ -15,6 +15,6 @@ def get_transactions(user:UserMODEL = Depends(get_current_user),db:Session = Dep
     return get_transactions_services(user,db)
 
 @router.get("/transaction/{id}")
-def get_particular_transaction(id:int = Path(url="/transaction/{id}"),user:UserMODEL = Depends(get_current_user),db:Session = Depends(get_db)):
+def get_particular_transaction(id:int = Path(),user:UserMODEL = Depends(get_current_user),db:Session = Depends(get_db)):
     return get_particular_transaction_services(id,user,db)
     

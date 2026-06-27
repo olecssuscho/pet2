@@ -34,6 +34,7 @@ class TransactionDB(Base):
     status : Mapped[str] = mapped_column(Enum("pending","success","failed","frozen",name = "status"), default="pending") 
     type : Mapped[str] = mapped_column(Enum("transfer","deposit","refund",name = "type"), default="transfer")  
     created_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default= lambda: datetime.now(timezone.utc)) 
+    deleted_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class PaymentRequestDB(Base):
@@ -78,3 +79,4 @@ class WebhookLogDB(Base):
     webhook_id : Mapped[int] = mapped_column(ForeignKey("Webhooks.id"))
     attempted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     responce_status : Mapped[str]
+    attemp_number : Mapped[int] = mapped_column(nullable=True)
