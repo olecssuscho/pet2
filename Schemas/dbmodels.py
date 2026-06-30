@@ -70,7 +70,6 @@ class WebhookDB(Base):
 
     id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
     url : Mapped[str] = mapped_column(nullable=True)
-    email : Mapped[str] = mapped_column(nullable=True)
     user_id : Mapped[int] = mapped_column(ForeignKey("Users.id"))
 
 class WebhookLogDB(Base):

@@ -78,7 +78,7 @@ async def webhook_post_email_services(email:str,result:str,user_id:int,db:Sessio
 
         message = MessageSchema(
             subject="FastApi-Mail Module",
-            recipients=[email],
+            recipients=[e for e in email],
             body=result,
             subtype= MessageType.html
         )

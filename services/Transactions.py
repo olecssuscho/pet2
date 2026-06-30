@@ -112,10 +112,8 @@ def transaction_service(backgroundtask:BackgroundTasks,email:str,transaction:Tra
         else:
             backgroundtask.add_task(post_webhook_on_url_services,webhook.url,transaction_db.status,sender_db.id,db)
             backgroundtask.add_task(post_webhook_on_url_services,webhook.url,transaction_db.status,reciever_db.id,db)
-
            
-            backgroundtask.add_task(webhook_post_email_services,reciever_db.email,transaction_db.status,reciever_db.id,db)
-            backgroundtask.add_task(webhook_post_email_services,sender_db.email,transaction_db.status,sender_db.id,db)
+            backgroundtask.add_task(webhook_post_email_services,[sender_db.email, reciever_db.email],transaction_db.status,reciever_db.id,db)
 
     except HTTPException:
         raise
