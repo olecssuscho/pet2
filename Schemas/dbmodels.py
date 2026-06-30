@@ -69,7 +69,8 @@ class WebhookDB(Base):
     __tablename__ = "Webhooks"
 
     id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
-    url : Mapped[str]
+    url : Mapped[str] = mapped_column(nullable=True)
+    email : Mapped[str] = mapped_column(nullable=True)
     user_id : Mapped[int] = mapped_column(ForeignKey("Users.id"))
 
 class WebhookLogDB(Base):
@@ -80,4 +81,17 @@ class WebhookLogDB(Base):
     webhook_id : Mapped[int] = mapped_column(ForeignKey("Webhooks.id"))
     attempted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     responce_status : Mapped[str]
-    attemp_number : Mapped[int] = mapped_column(nullable=True)
+    attempt_number : Mapped[int] = mapped_column(nullable=True)
+
+class EmailLogDB(Base):
+
+    __tablename__ = "EmailLogDB"
+
+    id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
+    webhook_id : Mapped[int] = mapped_column(ForeignKey("Webhooks.id"))
+    attempted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    responce_status : Mapped[str]
+    attempt_number : Mapped[int] = mapped_column(nullable=True)
+
+
+

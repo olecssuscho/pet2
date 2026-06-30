@@ -1,13 +1,18 @@
-from schemas.dbmodels import WebhookDB,UserDB,WebhookLogDB
+from typing import List
+
+from schemas.dbmodels import WebhookDB,UserDB,WebhookLogDB,EmailLogDB
 from sqlalchemy.orm import Session
 import httpx
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
 from fastapi import HTTPException,status
+from fastapi_mail import MessageSchema,ConnectionConfig,FastMail,MessageType
+from config import settings
 
-def webhook_post_service(url:str,user:UserDB,db:Session):
+def webhook_post_service(url:str,email:str,user:UserDB,db:Session):
     Webhook = WebhookDB(
         url = url,
-        user_id = user.id
+        user_id = user.id,
+        email = email
     )
     db.add(Webhook)
     db.commit()
@@ -24,7 +29,7 @@ def webhook_delete_service(id:int,db:Session):
     db.commit()
     return "Success"
 
-def post_webhook_on_url(URL: str, result: str, user_id: int, db: Session):
+def post_webhook_on_url_services(URL: str, result: str, user_id: int, db: Session):
     attempt = 0
     
     @retry(
@@ -46,3 +51,68 @@ def post_webhook_on_url(URL: str, result: str, user_id: int, db: Session):
         db.commit()
     
     _send()
+
+async def webhook_post_email_services(email:str,result:str,user_id:int,db:Session):
+    attempt = 0
+    
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=1, max=30),
+        retry=retry_if_exception_type(httpx.RequestError),
+        reraise=True
+    )
+    async def _send():
+        nonlocal attempt
+        attempt += 1
+        conf = ConnectionConfig(
+        MAIL_FROM= settings.MAIL_FROM,
+        MAIL_PORT= settings.MAIL_PORT,
+        MAIL_PASSWORD= settings.MAIL_PASSWORD,
+        MAIL_SERVER= settings.MAIL_SERVER,
+        MAIL_USERNAME= settings.MAIL_USERNAME,
+        MAIL_STARTTLS = True,
+        MAIL_SSL_TLS = False,
+        USE_CREDENTIALS = True,
+        VALIDATE_CERTS = True
+        )
+
+        message = MessageSchema(
+            subject="FastApi-Mail Module",
+            recipients=[email],
+            body=result,
+            subtype= MessageType.html
+        )
+    
+        fm = FastMail(conf)
+
+        try:
+            await fm.send_message(message)
+            response_status = "success"
+        except Exception as e:
+            response_status = f"failed: {str(e)}"
+        webhook = db.query(WebhookDB).filter(WebhookDB.user_id == user_id).first()
+        db.add(EmailLogDB(
+            webhook_id=webhook.id,
+            responce_status=response_status,
+            attempt_number=attempt
+        ))
+        db.commit()
+
+    await _send()
+    return "Message was sent"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -3,9 +3,10 @@ from schemas.responces import TransactionResponceGood
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from fastapi import status,HTTPException,BackgroundTasks
-from services.Webhook import post_webhook_on_url
+from services.Webhook import post_webhook_on_url_services
 import validators
 from datetime import timezone,datetime
+from services.Webhook import webhook_post_email_services
 
 def transaction_service(backgroundtask:BackgroundTasks,email:str,transaction:TransactionDB,reciever_email,db:Session) -> TransactionResponceGood:
 
@@ -109,9 +110,12 @@ def transaction_service(backgroundtask:BackgroundTasks,email:str,transaction:Tra
         if validators.url(webhook.url) is False:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail = " Your URL is not worked")
         else:
-            backgroundtask.add_task(post_webhook_on_url,webhook.url,transaction_db.status,sender_db.id,db)
-            backgroundtask.add_task(post_webhook_on_url,webhook.url,transaction_db.status,reciever_db.id,db)
+            backgroundtask.add_task(post_webhook_on_url_services,webhook.url,transaction_db.status,sender_db.id,db)
+            backgroundtask.add_task(post_webhook_on_url_services,webhook.url,transaction_db.status,reciever_db.id,db)
 
+           
+            backgroundtask.add_task(webhook_post_email_services,reciever_db.email,transaction_db.status,reciever_db.id,db)
+            backgroundtask.add_task(webhook_post_email_services,sender_db.email,transaction_db.status,sender_db.id,db)
 
     except HTTPException:
         raise
