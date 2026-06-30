@@ -42,13 +42,13 @@ def payment_request_approve_services(backgroundtask:BackgroundTasks,id:int,user:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not your payment request")
     
     transaction = TransactionMODEL(
-        reciever_email = PaymentRequest.to_user_email,
+        reciever_email = PaymentRequest.from_user_email,
         amount = PaymentRequest.amount,
         status = PaymentRequest.status,
         type = PaymentRequest.type
     )
 
-    transaction_db = transaction_service(backgroundtask,user.email,transaction,PaymentRequest.to_user_email,db)
+    transaction_db = transaction_service(backgroundtask,user.email,transaction,PaymentRequest.from_user_email,db)
 
     PaymentRequest.transaction_id = transaction_db.id
     PaymentRequest.status = "success"

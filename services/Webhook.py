@@ -76,11 +76,13 @@ async def webhook_post_email_services(email:str,result:str,user_id:int,db:Sessio
         VALIDATE_CERTS = True
         )
 
+        recipients = email if isinstance(email, list) else [email]
+
         message = MessageSchema(
             subject="FastApi-Mail Module",
-            recipients=[e for e in email],
+            recipients=recipients,
             body=result,
-            subtype= MessageType.html
+            subtype=MessageType.html
         )
     
         fm = FastMail(conf)

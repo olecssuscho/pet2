@@ -104,17 +104,12 @@ def transaction_service(backgroundtask:BackgroundTasks,email:str,transaction:Tra
         db.refresh(transaction_db)
 
         webhook = db.query(WebhookDB).filter(WebhookDB.user_id == sender_db.id).first()
-        if webhook is None:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail = " Your Webhook is not found") 
-
-        if validators.url(webhook.url) is False:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail = " Your URL is not worked")
-        else:
+        if webhook and validators.url(webhook.url):
             backgroundtask.add_task(post_webhook_on_url_services,webhook.url,transaction_db.status,sender_db.id,db)
             backgroundtask.add_task(post_webhook_on_url_services,webhook.url,transaction_db.status,reciever_db.id,db)
            
             backgroundtask.add_task(webhook_post_email_services,[sender_db.email, reciever_db.email],transaction_db.status,reciever_db.id,db)
-
+ 
     except HTTPException:
         raise
 
@@ -138,7 +133,11 @@ def get_particular_transaction_services(id:int,user:UserDB,db:Session):
     return transaction
 
 def delete_transaction_services(id:int,user:UserDB,db:Session):
-    to_delete = db.query(TransactionDB).filter(TransactionDB.id == id).first()
+    to_delete = db.query(TransactionDB).filter((TransactionDB.id == id) , (TransactionDB.attempted_sender_email == user.email)).first()
     to_delete.deleted_at = datetime.now(timezone.utc)
+    
+    if not to_delete:
+        raise HTTPException(status_code=404, detail="Transaction not found or not yours")
+
     db.commit()
     return "Success"
