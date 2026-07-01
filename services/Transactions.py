@@ -122,8 +122,7 @@ def transaction_service(backgroundtask:BackgroundTasks,email:str,transaction:Tra
 
 def get_transactions_services(user:UserDB,db:Session):
     return db.query(TransactionDB).filter((TransactionDB.sender_id == user.id) | ((TransactionDB.reciever_id == user.id))).all()
-
-
+        
 def get_particular_transaction_services(id:int,user:UserDB,db:Session):
     transaction = db.query(TransactionDB).filter(TransactionDB.id == id,(TransactionDB.sender_id == user.id) | (TransactionDB.reciever_id == user.id)).first()
     
