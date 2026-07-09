@@ -71,6 +71,7 @@ class WebhookDB(Base):
 
     id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
     url : Mapped[str] = mapped_column(nullable=True)
+    email : Mapped[str] = mapped_column(nullable=True)
     user_id : Mapped[int] = mapped_column(ForeignKey("Users.id"))
 
 class WebhookLogDB(Base):
@@ -101,7 +102,7 @@ class IdempotencyKeyDB (Base):
     id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
     key : Mapped[str]
     user_id : Mapped[int] = mapped_column(ForeignKey("Users.id"))
-    responce : Mapped[dict] = mapped_column(JSON)
+    responce : Mapped[int] = mapped_column(JSON)
     created_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default= lambda: datetime.now(timezone.utc))
     expires_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default= lambda: datetime.now(timezone.utc)+ timedelta(hours=24))
     transaction_id : Mapped[int] = mapped_column(ForeignKey("Transactions.id"))

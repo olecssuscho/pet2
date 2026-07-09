@@ -1,7 +1,7 @@
 from schemas.dbmodels import PaymentRequestDB,UserDB,TransactionDB
 from schemas.models import TransactionMODEL
 from sqlalchemy.orm import Session
-from fastapi import status,HTTPException,BackgroundTasks
+from fastapi import Request, status,HTTPException,BackgroundTasks
 from services.Transactions import transaction_service
 
 def payment_request_services(user:UserDB,payment_request:PaymentRequestDB,db:Session):
@@ -32,7 +32,7 @@ def payment_request_services(user:UserDB,payment_request:PaymentRequestDB,db:Ses
 def get_payment_requests_services(user:UserDB,db:Session):
     return db.query(PaymentRequestDB).filter((PaymentRequestDB.from_user_id == user.id) | (PaymentRequestDB.to_user_id == user.id)).all()
 
-def payment_request_approve_services(backgroundtask:BackgroundTasks,id:int,user:UserDB,db:Session):
+def payment_request_approve_services(backgroundtask:BackgroundTasks,id:int,user:UserDB,db:Session,request:Request):
     PaymentRequest = db.query(PaymentRequestDB).filter(PaymentRequestDB.id == id).first()
     
     if not PaymentRequest:
@@ -48,7 +48,7 @@ def payment_request_approve_services(backgroundtask:BackgroundTasks,id:int,user:
         type = PaymentRequest.type
     )
 
-    transaction_db = transaction_service(backgroundtask,user.email,transaction,PaymentRequest.from_user_email,db)
+    transaction_db = transaction_service(backgroundtask,user.email,transaction,PaymentRequest.from_user_email,db,request)
 
     PaymentRequest.transaction_id = transaction_db.id
     PaymentRequest.status = "success"

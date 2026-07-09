@@ -21,8 +21,8 @@ def webhook_post_service(url:str,email:str,user:UserDB,db:Session):
 def webhook_get_service(user:UserDB,db:Session):
     return db.query(WebhookDB).filter(WebhookDB.user_id == user.id).all()
 
-def webhook_delete_service(id:int,db:Session):
-    if db.query(WebhookDB).filter(WebhookDB.id == id).first():
+def webhook_delete_service(user:UserDB,id:int,db:Session):
+    if db.query(WebhookDB).filter((WebhookDB.id == id),(WebhookDB.user_id == user.id)).first():
         db.delete(db.query(WebhookDB).filter(WebhookDB.id == id).first())
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail = "Your webhook not found")

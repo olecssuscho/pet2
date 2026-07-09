@@ -134,10 +134,11 @@ def get_particular_transaction_services(id:int,user:UserDB,db:Session):
 
 def delete_transaction_services(id:int,user:UserDB,db:Session):
     to_delete = db.query(TransactionDB).filter((TransactionDB.id == id) , (TransactionDB.attempted_sender_email == user.email)).first()
-    to_delete.deleted_at = datetime.now(timezone.utc)
     
     if not to_delete:
         raise HTTPException(status_code=404, detail="Transaction not found or not yours")
+    
+    to_delete.deleted_at = datetime.now(timezone.utc)
 
     db.commit()
     return "Success"
