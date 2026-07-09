@@ -1,8 +1,9 @@
 from schemas.models import TransactionMODEL,UserMODEL
 from sqlalchemy.orm import Session
 from fastapi_pagination import paginate,Page
-from fastapi import Depends,APIRouter,Path,BackgroundTasks, Request
+from fastapi import Depends,APIRouter, Header,Path,BackgroundTasks,Request
 from dependency import get_db,get_current_user
+from schemas.responces import TransactionResponceGood
 from services.Transactions import (transaction_service,
                                     get_transactions_services,
                                     get_particular_transaction_services,
@@ -13,10 +14,10 @@ router = APIRouter(prefix="/transaction", tags=["Transactions"])
 
 @router.post("/transaction")
 @limiter.limit("5/minute")
-def transaction(request: Request,backgroundtask:BackgroundTasks,transaction:TransactionMODEL,user:UserMODEL = Depends(get_current_user),db:Session = Depends(get_db)):
-    return transaction_service(backgroundtask,user.email,transaction,transaction.reciever_email,db)
+def transaction(request: Request,backgroundtask:BackgroundTasks,transaction:TransactionMODEL,x_idempotency_key:str = Header(None),user:UserMODEL = Depends(get_current_user),db:Session = Depends(get_db)):
+    return transaction_service(backgroundtask,user.email,transaction,transaction.reciever_email,db,request)
 
-@router.get("/transaction/get", response_model=Page[TransactionMODEL])
+@router.get("/transaction/get", response_model=Page[TransactionResponceGood])
 def get_transactions(user:UserMODEL = Depends(get_current_user),db:Session = Depends(get_db)):
     return paginate(get_transactions_services(user,db))
 

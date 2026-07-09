@@ -2,13 +2,13 @@ from schemas.dbmodels import UserDB,TransactionDB,WebhookDB
 from schemas.responces import TransactionResponceGood
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from fastapi import status,HTTPException,BackgroundTasks
+from fastapi import Request, status,HTTPException,BackgroundTasks
 from services.Webhook import post_webhook_on_url_services
 import validators
 from datetime import timezone,datetime
 from services.Webhook import webhook_post_email_services
 
-def transaction_service(backgroundtask:BackgroundTasks,email:str,transaction:TransactionDB,reciever_email,db:Session) -> TransactionResponceGood:
+def transaction_service(backgroundtask:BackgroundTasks,email:str,transaction:TransactionDB,reciever_email,db:Session,request:Request) -> TransactionResponceGood:
 
     try:
         sender_db = db.query(UserDB).filter(UserDB.email==email).with_for_update().first()
@@ -101,6 +101,7 @@ def transaction_service(backgroundtask:BackgroundTasks,email:str,transaction:Tra
             )
         db.add(transaction_db)
         db.commit()
+        request.state.transaction_id = transaction_db.id
         db.refresh(transaction_db)
 
         webhook = db.query(WebhookDB).filter(WebhookDB.user_id == sender_db.id).first()

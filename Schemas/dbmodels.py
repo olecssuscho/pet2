@@ -1,6 +1,7 @@
-from sqlalchemy import Enum,ForeignKey,DateTime
+from sqlalchemy import Enum,ForeignKey,DateTime,UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase,Mapped,mapped_column
-from datetime import timezone,datetime
+from datetime import timezone,datetime,timedelta
+from sqlalchemy import JSON
 
 class Base(DeclarativeBase):
     pass
@@ -92,5 +93,15 @@ class EmailLogDB(Base):
     responce_status : Mapped[str]
     attempt_number : Mapped[int] = mapped_column(nullable=True)
 
+class IdempotencyKeyDB (Base):
 
+    __tablename__ = "IdempotencyKeyDB"
+    __table_args__ = (UniqueConstraint("key", "user_id"),)
 
+    id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
+    key : Mapped[str]
+    user_id : Mapped[int] = mapped_column(ForeignKey("Users.id"))
+    responce : Mapped[dict] = mapped_column(JSON)
+    created_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default= lambda: datetime.now(timezone.utc))
+    expires_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default= lambda: datetime.now(timezone.utc)+ timedelta(hours=24))
+    transaction_id : Mapped[int] = mapped_column(ForeignKey("Transactions.id"))
