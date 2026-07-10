@@ -2,13 +2,17 @@ from database import SessionLocal
 from fastapi import Request
 from sqlalchemy.dialects.postgresql import insert
 from fastapi.responses import JSONResponse
-from schemas.dbmodels import IdempotencyKeyDB,UserDB,TransactionDB
+from schemas.dbmodels import IdempotencyKeyDB,UserDB,TransactionDB,BlacklistDB
 from auth import decode_token
 
 async def idempotency_middleware(request: Request, call_next):
     db = SessionLocal()
     sendet_key = request.headers.get("X-Idempotency-Key")
-    
+    ip = request.client.host
+    if db.query(BlacklistDB).filter(BlacklistDB.ip == ip).first():
+        db.close()
+        return JSONResponse(content={"detail":"This ip was blocked"},status_code=403)
+
     try:
         if sendet_key:
             token = request.headers.get("Authorization", "").replace("Bearer ", "")

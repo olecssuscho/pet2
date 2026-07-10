@@ -94,7 +94,7 @@ class EmailLogDB(Base):
     responce_status : Mapped[str]
     attempt_number : Mapped[int] = mapped_column(nullable=True)
 
-class IdempotencyKeyDB (Base):
+class IdempotencyKeyDB(Base):
 
     __tablename__ = "IdempotencyKeyDB"
     __table_args__ = (UniqueConstraint("key", "user_id"),)
@@ -106,3 +106,13 @@ class IdempotencyKeyDB (Base):
     created_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default= lambda: datetime.now(timezone.utc))
     expires_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default= lambda: datetime.now(timezone.utc)+ timedelta(hours=24))
     transaction_id : Mapped[int] = mapped_column(ForeignKey("Transactions.id"))
+
+class BlacklistDB(Base):
+
+    __tablename__ = "Blacklist"
+
+    id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
+    ip : Mapped[str]
+    reason : Mapped[str]
+    created_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    

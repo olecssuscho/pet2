@@ -26,6 +26,3 @@ class RefundMODEL(BaseModel):
     reason:str
     status:str = "pending"
 
-class WebhookMODEL(BaseModel):
-    url:str
-
