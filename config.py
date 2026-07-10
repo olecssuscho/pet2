@@ -10,9 +10,10 @@ class Settings(BaseSettings):
     MAIL_USERNAME: str
     MAIL_PASSWORD: str
     MAIL_FROM: str
-    MAIL_PORT: str
+    MAIL_PORT: int
     MAIL_SERVER: str
     MAIL_FROM_NAME: str
+    MAX_SIZE: int
     model_config= ConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 

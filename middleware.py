@@ -4,6 +4,7 @@ from sqlalchemy.dialects.postgresql import insert
 from fastapi.responses import JSONResponse
 from schemas.dbmodels import IdempotencyKeyDB,UserDB,TransactionDB,BlacklistDB
 from auth import decode_token
+from config import settings
 
 async def idempotency_middleware(request: Request, call_next):
     db = SessionLocal()
@@ -29,8 +30,14 @@ async def idempotency_middleware(request: Request, call_next):
             
             if cached:
                 transaction = db.query(TransactionDB).filter(cached.transaction_id == TransactionDB.id).first()
-        
                 return JSONResponse(content={"amount": transaction.amount, "status": transaction.status})
+
+        if request.method =="POST":
+            lenght = request.headers.get("content-length")
+            print(f"CONTENT-LENGHT  {lenght}")
+            if lenght and int(lenght)>settings.MAX_SIZE:
+                db.close()
+                return JSONResponse(status_code=413, content={"detail": "Content length more than 1 MB"})
 
         response = await call_next(request)
 
@@ -41,6 +48,8 @@ async def idempotency_middleware(request: Request, call_next):
             stmt = stmt.on_conflict_do_nothing(index_elements=["user_id","key"])
             db.execute(stmt)
             db.commit()
+
+        
         return response
     
     finally:
