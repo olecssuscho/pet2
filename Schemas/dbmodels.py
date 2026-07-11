@@ -128,3 +128,15 @@ class AuditLogDB(Base):
     reason : Mapped[str]
     created_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     
+class RequestLogDB(Base):
+
+    __tablename__ = "RequestLog"
+
+    id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
+    user_id : Mapped[int] = mapped_column(ForeignKey("Users.id"),nullable=True)
+    url : Mapped[str]
+    method : Mapped[str]
+    status_code : Mapped[str]
+    ip : Mapped[str]
+    process_time : Mapped[float] 
+    created_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
