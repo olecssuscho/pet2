@@ -8,6 +8,7 @@ from middleware import idempotency_middleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from apscheduler.schedulers.background import BackgroundScheduler
 from scheduler import auto_delete_row
+import event
 
 app = FastAPI()
 app.state.limiter = limiter

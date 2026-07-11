@@ -115,4 +115,16 @@ class BlacklistDB(Base):
     ip : Mapped[str]
     reason : Mapped[str]
     created_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+
+class AuditLogDB(Base):
+
+    __tablename__ = "AuditLog"
+
+    id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
+    user_id : Mapped[int] = mapped_column(ForeignKey("Users.id"))
+    old_balance : Mapped[int]
+    new_balance : Mapped[int]
+    changed_by : Mapped[str]
+    reason : Mapped[str]
+    created_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     

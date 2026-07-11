@@ -85,9 +85,11 @@ def transaction_service(backgroundtask:BackgroundTasks,email:str,transaction:Tra
             db.add(bad_transaction_db)
             db.commit()
             raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,detail="Sender amount less than 0 or less than balance")
-        
-        db.query(UserDB).filter(UserDB.email==email).update({UserDB.balance: UserDB.balance - sender_amount})
-        db.query(UserDB).filter(UserDB.email==reciever_email).update({UserDB.balance: UserDB.balance + sender_amount})
+    
+        sender_db._changed_by = email
+        sender_db._reason = "transaction"
+        sender_db.balance = sender_db.balance - sender_amount
+        reciever_db.balance = reciever_db.balance + sender_amount
     
         transaction_db = TransactionDB( 
             sender_id = sender_db.id,
