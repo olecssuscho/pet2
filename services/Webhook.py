@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from typing import List
 
 from database import SessionLocal
@@ -35,7 +36,6 @@ def post_webhook_on_url_services(URL: str, result: str, user_id: int):
     try:
         attempt = 0
         target = db.query(WebhookDB).filter(WebhookDB.user_id == user_id).first()
-        target.failure_count = 0
         @retry(
             stop=stop_after_attempt(3),
             wait=wait_exponential(multiplier=1, min=1, max=30),
@@ -45,11 +45,16 @@ def post_webhook_on_url_services(URL: str, result: str, user_id: int):
         def _send():
             nonlocal attempt
             attempt += 1
-            target.failure_count += 1
-            if target.failure_count >= 3:
-                target.is_active = False
-                target.deactivated_at 
-            r = httpx.post(url=URL, content=result)
+            try:
+                r = httpx.post(url=URL, content=result)
+                target.failure_count = 0
+            except httpx.RequestError:
+                target.failure_count += 1
+                if target.failure_count >= 5:
+                    target.is_active = False
+                    target.deactivated_at = datetime.now(timezone.utc)
+                db.commit()
+                raise 
             webhook = db.query(WebhookDB).filter(WebhookDB.user_id == user_id).first()
             db.add(WebhookLogDB(
                 webhook_id=webhook.id,
