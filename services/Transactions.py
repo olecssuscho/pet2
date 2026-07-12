@@ -88,6 +88,8 @@ def transaction_service(backgroundtask:BackgroundTasks,email:str,transaction:Tra
     
         sender_db._changed_by = email
         sender_db._reason = "transaction"
+        reciever_db._changed_by = email
+        reciever_db._reason = "transaction"
         sender_db.balance = sender_db.balance - sender_amount
         reciever_db.balance = reciever_db.balance + sender_amount
     
@@ -107,9 +109,13 @@ def transaction_service(backgroundtask:BackgroundTasks,email:str,transaction:Tra
         db.refresh(transaction_db)
 
         webhook = db.query(WebhookDB).filter(WebhookDB.user_id == sender_db.id).first()
+
+        if webhook.is_active is False:
+            return transaction_db
+
         if webhook and validators.url(webhook.url):
-            backgroundtask.add_task(post_webhook_on_url_services,webhook.url,transaction_db.status,sender_db.id,db)
-            backgroundtask.add_task(post_webhook_on_url_services,webhook.url,transaction_db.status,reciever_db.id,db)
+            backgroundtask.add_task(post_webhook_on_url_services,webhook.url,transaction_db.status,sender_db.id)
+            backgroundtask.add_task(post_webhook_on_url_services,webhook.url,transaction_db.status,reciever_db.id)
            
             backgroundtask.add_task(webhook_post_email_services,[sender_db.email, reciever_db.email],transaction_db.status,reciever_db.id,db)
  

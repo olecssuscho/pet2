@@ -16,7 +16,7 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded,_rate_limit_exceeded_handler)
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(auto_delete_row,'interval',days=1)
+scheduler.add_job(auto_delete_row,'interval',seconds=10)
 scheduler.start()
 
 @app.get("/")

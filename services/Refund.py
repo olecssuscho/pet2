@@ -23,7 +23,10 @@ def refund_services(email:str,refund:RefundDB,db:Session):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST , detail="Only successful transactions can be refunded")
     
     #important part
-
+    sender_db._changed_by = email
+    sender_db._reason = "refund"
+    receiver_db._changed_by = email
+    receiver_db._reason = "refund"
     sender_db = db.query(UserDB).filter(UserDB.id==transaction_db.sender_id).with_for_update().first()
     receiver_db = db.query(UserDB).filter(UserDB.id==transaction_db.reciever_id).with_for_update().first()
 

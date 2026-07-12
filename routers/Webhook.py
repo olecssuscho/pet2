@@ -21,11 +21,11 @@ def webhook_get(user:UserMODEL = Depends(get_current_user),db:Session = Depends(
 
 @router.delete("/webhook/{id}")
 def webhook_delete(id:int,user:UserMODEL = Depends(get_current_user),db:Session = Depends(get_db)):
-    return webhook_delete_service(id,db)
+    return webhook_delete_service(user,id,db)
 
 @router.post("/webhook/url/post")
 def webhook_post_url(url:str = None,result:str = None,user:UserMODEL = Depends(get_current_user),db:Session = Depends(get_db)):
-    return post_webhook_on_url_services(url,result,user.id,db)
+    return post_webhook_on_url_services(url,result,user.id)
 
 @router.post("/webhook/email/post")
 async def webhook_post_email(result:str,user:UserMODEL = Depends(get_current_user),db:Session = Depends(get_db)):

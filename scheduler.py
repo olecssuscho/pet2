@@ -5,6 +5,7 @@ from datetime import datetime,timezone
 def auto_delete_row():
     db = SessionLocal()
     try:
+        
         db.query(IdempotencyKeyDB).filter(IdempotencyKeyDB.expires_at < datetime.now(timezone.utc)).delete()
         db.commit()
     

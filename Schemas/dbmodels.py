@@ -73,6 +73,9 @@ class WebhookDB(Base):
     url : Mapped[str] = mapped_column(nullable=True)
     email : Mapped[str] = mapped_column(nullable=True)
     user_id : Mapped[int] = mapped_column(ForeignKey("Users.id"))
+    failure_count : Mapped[int] = mapped_column(default=0,nullable=True)
+    is_active : Mapped[bool] = mapped_column(default=True,nullable=True)
+    deactivated_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc),nullable=True)
 
 class WebhookLogDB(Base):
 
@@ -80,7 +83,7 @@ class WebhookLogDB(Base):
 
     id : Mapped[int] = mapped_column(primary_key=True,autoincrement=True)
     webhook_id : Mapped[int] = mapped_column(ForeignKey("Webhooks.id"))
-    attempted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    attempted_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     responce_status : Mapped[str]
     attempt_number : Mapped[int] = mapped_column(nullable=True)
 

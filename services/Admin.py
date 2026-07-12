@@ -22,17 +22,17 @@ def get_transactions_stats_services(db:Session):
     return {"count":count,"sum":sum_amount}
 
 def block_ip_services(sendet_ip:str,sendet_reason:str,db:Session):
-    BL = BlacklistDB(ip=sendet_ip,reason=sendet_reason)
-    if db.query(BlacklistDB).filter(BL.ip == sendet_ip).first():
+    BList = BlacklistDB(ip=sendet_ip,reason=sendet_reason)
+    if db.query(BlacklistDB).filter(BlacklistDB.ip == sendet_ip).first():
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail= "Ip alredy has banned")
-    db.add(BL)
+    db.add(BList)
     db.commit()
-    return BL
+    return BList
 
 def unblock_ip_services(sendet_ip:str,db:Session):
-    BL = db.query(BlacklistDB).filter(BlacklistDB.ip == sendet_ip).first()
-    if BL is None:
+    BList = db.query(BlacklistDB).filter(BlacklistDB.ip == sendet_ip).first()
+    if BList is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail= "Ip did not found")
-    db.delete(BL)
+    db.delete(BList)
     db.commit()
     return "Ip was unblocked"

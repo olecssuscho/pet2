@@ -1,5 +1,6 @@
 from typing import List
 
+from database import SessionLocal
 from schemas.dbmodels import WebhookDB,UserDB,WebhookLogDB,EmailLogDB
 from sqlalchemy.orm import Session
 import httpx
@@ -29,28 +30,37 @@ def webhook_delete_service(user:UserDB,id:int,db:Session):
     db.commit()
     return "Success"
 
-def post_webhook_on_url_services(URL: str, result: str, user_id: int, db: Session):
-    attempt = 0
-    
-    @retry(
-        stop=stop_after_attempt(3),
-        wait=wait_exponential(multiplier=1, min=1, max=30),
-        retry=retry_if_exception_type(httpx.RequestError),
-        reraise=True
-    )
-    def _send():
-        nonlocal attempt
-        attempt += 1
-        r = httpx.post(url=URL, content=result)
-        webhook = db.query(WebhookDB).filter(WebhookDB.user_id == user_id).first()
-        db.add(WebhookLogDB(
-            webhook_id=webhook.id,
-            responce_status=r.status_code,
-            attempt_number=attempt
-        ))
-        db.commit()
-    
-    _send()
+def post_webhook_on_url_services(URL: str, result: str, user_id: int):
+    db = SessionLocal()
+    try:
+        attempt = 0
+        target = db.query(WebhookDB).filter(WebhookDB.user_id == user_id).first()
+        target.failure_count = 0
+        @retry(
+            stop=stop_after_attempt(3),
+            wait=wait_exponential(multiplier=1, min=1, max=30),
+            retry=retry_if_exception_type(httpx.RequestError),
+            reraise=True
+        )
+        def _send():
+            nonlocal attempt
+            attempt += 1
+            target.failure_count += 1
+            if target.failure_count >= 3:
+                target.is_active = False
+                target.deactivated_at 
+            r = httpx.post(url=URL, content=result)
+            webhook = db.query(WebhookDB).filter(WebhookDB.user_id == user_id).first()
+            db.add(WebhookLogDB(
+                webhook_id=webhook.id,
+                responce_status=r.status_code,
+                attempt_number=attempt
+            ))
+            db.commit()
+
+        _send()
+    finally:
+        db.close()
 
 async def webhook_post_email_services(email:str,result:str,user_id:int,db:Session):
     attempt = 0

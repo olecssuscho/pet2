@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 import pytest
-from schemas.dbmodels import UserDB, TransactionDB, PaymentRequestDB, RefundDB,WebhookDB,WebhookLogDB,IdempotencyKeyDB,EmailLogDB
+from schemas.dbmodels import UserDB, TransactionDB, PaymentRequestDB, RefundDB,WebhookDB,WebhookLogDB,IdempotencyKeyDB,EmailLogDB,AuditLogDB,RequestLogDB,BlacklistDB
 from sqlalchemy.orm import sessionmaker
 from main import app
 from dependency import get_db
@@ -34,6 +34,9 @@ def clear_db():
     db.query(WebhookLogDB).delete()
     db.query(IdempotencyKeyDB).delete()
     db.query(EmailLogDB).delete()
+    db.query(AuditLogDB).delete()
+    db.query(RequestLogDB).delete()
+    db.query(AuditLogDB).delete()
     db.commit()
     db.close()
     yield
